@@ -1,0 +1,827 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LSBF Staff Attendance Portal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f5;
+  --color-background-tertiary: #efefef;
+  --color-border-tertiary: #e0e0e0;
+  --color-border-secondary: #d0d0d0;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --border-radius-lg: 10px;
+  --border-radius-md: 6px;
+}
+body { background: var(--color-background-tertiary); font-family: var(--font-sans); }
+.portal { min-height: 100vh; }
+.header { background: #1a1a1a; color: white; }
+.header-inner { display: flex; align-items: center; gap: 20px; padding: 14px 24px; }
+.lsbf-main { font-size: 32px; font-weight: 800; color: #c0272d; letter-spacing: -1px; font-family: Arial Black, Arial, sans-serif; }
+.lsbf-college { font-size: 14px; color: #ccc; letter-spacing: 2px; margin-top: -2px; }
+.lsbf-sub { font-size: 10px; color: #999; margin-top: 3px; border-top: 0.5px solid #555; padding-top: 3px; }
+.lsbf-text { display: flex; flex-direction: column; line-height: 1; }
+.header-divider { width: 1px; height: 48px; background: #444; margin: 0 8px; }
+.header-portal-info h1 { font-size: 15px; font-weight: 500; color: white; }
+.header-portal-info p { font-size: 11px; color: #999; margin-top: 3px; }
+.header-right { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-wrap: wrap; }
+.header-date { font-size: 11px; color: #999; text-align: right; }
+.admin-user-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 0.5px solid #444; border-radius: 30px; padding: 4px 12px 4px 5px; }
+.admin-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; background: #c0272d; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; }
+.admin-name { font-size: 12px; color: #ddd; }
+.logout-btn { padding: 6px 14px; font-size: 12px; background: rgba(255,255,255,0.08); color: #ccc; border: 0.5px solid #555; border-radius: var(--border-radius-md); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.logout-btn:hover { background: rgba(255,255,255,0.15); }
+.nav-bar { background: #111; display: flex; border-top: 1px solid #333; }
+.nav-btn { padding: 11px 22px; font-size: 13px; color: #aaa; cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 7px; }
+.nav-btn.active { color: white; border-bottom-color: #c0272d; background: rgba(255,255,255,0.04); }
+.nav-btn:hover:not(.active) { background: rgba(255,255,255,0.03); color: #ddd; }
+.content { padding: 20px 24px; }
+.view { display: none; }
+.view.active { display: block; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 18px; }
+.slabel { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.svalue { font-size: 28px; font-weight: 500; }
+.svalue.green { color: #2d7a2d; } .svalue.red { color: #a32d2d; } .svalue.blue { color: #185fa5; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.dot.green { background: #639922; } .dot.red { background: #e24b4a; } .dot.blue { background: #378add; }
+.search-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.search-bar input { flex: 1; min-width: 160px; padding: 8px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+.fsel { padding: 8px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+.staff-table { width: 100%; border-collapse: collapse; background: var(--color-background-primary); border-radius: var(--border-radius-lg); overflow: hidden; border: 0.5px solid var(--color-border-tertiary); table-layout: fixed; }
+.staff-table th { background: var(--color-background-secondary); font-size: 11px; font-weight: 500; color: var(--color-text-secondary); padding: 10px 14px; text-align: left; border-bottom: 0.5px solid var(--color-border-tertiary); text-transform: uppercase; letter-spacing: 0.5px; }
+.staff-table td { padding: 11px 14px; font-size: 13px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.staff-table tr:last-child td { border-bottom: none; }
+.staff-table tr:hover td { background: var(--color-background-secondary); }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.badge.present { background: #eaf3de; color: #3b6d11; }
+.badge.absent { background: #fcebeb; color: #a32d2d; }
+.badge.medical { background: #fff3e0; color: #b85c00; }
+.badge.emergency { background: #fce4ec; color: #b71c3c; }
+.badge.annual { background: #e3f2fd; color: #1565c0; }
+.leave-reason { font-size: 11px; color: var(--color-text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+.toggle-btn { padding: 5px 14px; border-radius: var(--border-radius-md); font-size: 12px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-primary); transition: all 0.15s; white-space: nowrap; }
+.toggle-btn.mark-absent { border-color: #f0c4c4; color: #a32d2d; }
+.toggle-btn.mark-present { border-color: #c0dd97; color: #3b6d11; }
+
+/* ── Google Sign-In Screen ── */
+.admin-lock { display: flex; align-items: center; justify-content: center; padding: 40px 0; }
+.login-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 40px; width: 380px; text-align: center; }
+.login-logo { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+.login-lsbf { font-size: 40px; font-weight: 800; color: #c0272d; font-family: Arial Black, Arial, sans-serif; line-height: 1; }
+.login-college { font-size: 13px; color: var(--color-text-secondary); letter-spacing: 2px; }
+.login-sub { font-size: 10px; color: var(--color-text-secondary); border-top: 0.5px solid var(--color-border-tertiary); padding-top: 6px; margin-top: 4px; }
+.login-card h2 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.login-card .sub { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 28px; line-height: 1.6; }
+.google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 16px; background: white; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-weight: 500; color: #333; cursor: pointer; transition: box-shadow 0.15s, background 0.15s; text-decoration: none; }
+.google-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); background: #fafafa; }
+.google-logo { width: 20px; height: 20px; }
+.auth-notice { margin-top: 16px; font-size: 11px; color: var(--color-text-secondary); line-height: 1.6; }
+.auth-failed-msg { background: #fcebeb; border: 0.5px solid #f0c4c4; border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 12px; color: #a32d2d; margin-bottom: 16px; display: none; }
+
+/* ── Sub-tabs ── */
+.sub-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 0.5px solid var(--color-border-tertiary); flex-wrap: wrap; }
+.sub-tab { padding: 9px 20px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; display: flex; align-items: center; gap: 7px; }
+.sub-tab.active { color: #c0272d; border-bottom-color: #c0272d; font-weight: 500; }
+.sub-tab:hover:not(.active) { color: var(--color-text-primary); }
+.sub-panel { display: none; }
+.sub-panel.active { display: block; }
+
+/* ── Leave modal ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.modal-overlay.hidden { display: none; }
+.modal { background: var(--color-background-primary); border-radius: var(--border-radius-lg); padding: 28px; width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
+.modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.modal p { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 16px; }
+.modal label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 5px; }
+.modal select, .modal textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); margin-bottom: 14px; font-family: var(--font-sans); }
+.modal textarea { resize: vertical; min-height: 70px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+.modal-actions button { flex: 1; padding: 9px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); }
+.btn-primary { background: #c0272d !important; color: white !important; border-color: #c0272d !important; font-weight: 500; }
+.btn-primary:hover { background: #a01f24 !important; }
+.btn-cancel { background: var(--color-background-secondary); color: var(--color-text-primary); }
+
+/* ── Add staff ── */
+.add-staff-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 28px; flex: 1; min-width: 280px; }
+.add-staff-card h3 { font-size: 15px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.add-staff-card .desc { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 20px; padding-bottom: 14px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.field-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 5px; display: block; }
+.add-staff-card input, .add-staff-card select { width: 100%; margin-bottom: 12px; padding: 9px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+.save-btn { width: 100%; padding: 10px; background: #c0272d; color: white; border: none; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; font-weight: 500; }
+.save-btn:hover { background: #a01f24; }
+.staff-list-mini { border-top: 0.5px solid var(--color-border-tertiary); padding-top: 14px; margin-top: 16px; }
+.staff-list-mini h4 { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.staff-item-mini { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); margin-bottom: 6px; background: var(--color-background-secondary); font-size: 12px; }
+.staff-item-mini .sname { font-weight: 500; }
+.staff-item-mini .sdept { color: var(--color-text-secondary); font-size: 11px; margin-top: 1px; }
+.remove-staff-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 15px; padding: 2px 4px; border-radius: 4px; }
+.remove-staff-btn:hover { color: #a32d2d; background: #fcebeb; }
+
+/* ── Settings ── */
+.settings-wrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.settings-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 28px; width: 360px; }
+.settings-card h3 { font-size: 15px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.settings-card .desc { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 22px; padding-bottom: 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.settings-card input { width: 100%; margin-bottom: 14px; padding: 9px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+.pw-row { position: relative; margin-bottom: 14px; }
+.pw-row input { margin-bottom: 0; padding-right: 38px; width: 100%; }
+.pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-secondary); font-size: 16px; }
+.info-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 14px 16px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.8; }
+.info-box strong { color: var(--color-text-primary); }
+.error-msg { color: #a32d2d; font-size: 12px; margin-bottom: 10px; display: none; }
+.success-msg { color: #3b6d11; font-size: 12px; margin-bottom: 10px; display: none; }
+
+/* ── Notifications ── */
+.students-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 20px 24px; margin-bottom: 16px; }
+.students-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.student-row { display: flex; align-items: flex-start; gap: 16px; padding: 12px 14px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); margin-bottom: 8px; flex-wrap: wrap; }
+.student-info strong { font-size: 13px; font-weight: 500; }
+.student-info .smeta { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+.affected-badge { display: inline-flex; align-items: center; gap: 4px; background: #fff3e0; color: #b85c00; border: 0.5px solid #ffcc80; border-radius: 20px; font-size: 11px; font-weight: 500; padding: 2px 10px; }
+.notif-log-item { padding: 14px 18px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.notif-log-item:last-child { border-bottom: none; }
+.notif-banner { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.notif-section { margin-top: 24px; }
+.notif-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.notif-header h3 { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.no-notif { text-align: center; padding: 32px; color: var(--color-text-secondary); font-size: 13px; }
+.send-notif-btn { padding: 7px 16px; background: #1565c0; color: white; border: none; border-radius: var(--border-radius-md); font-size: 12px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.send-notif-btn:hover { background: #0d47a1; }
+.send-notif-btn:disabled { background: #aaa; cursor: not-allowed; }
+.btn-email { padding: 5px 12px; background: #e3f2fd; color: #1565c0; border: 0.5px solid #90caf9; border-radius: var(--border-radius-md); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; }
+.btn-email:hover { background: #bbdefb; }
+.notif-preview-box { background: #f8f9ff; border: 0.5px solid #dce4ff; border-radius: var(--border-radius-md); padding: 12px 16px; font-size: 12px; color: #555; line-height: 1.7; margin-top: 8px; }
+.sent-badge { display: inline-flex; align-items: center; gap: 4px; background: #eaf3de; color: #3b6d11; border-radius: 20px; font-size: 11px; font-weight: 500; padding: 2px 10px; }
+
+/* ── Reports ── */
+.report-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.snap-btn { padding: 8px 18px; background: #c0272d; color: white; border: none; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.snap-btn:hover { background: #a01f24; }
+.dl-btn { padding: 8px 16px; background: var(--color-background-primary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.dl-btn:hover { background: var(--color-background-secondary); }
+.report-list { display: flex; flex-direction: column; gap: 12px; }
+.report-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+.report-header { display: flex; align-items: center; gap: 14px; padding: 14px 18px; cursor: pointer; user-select: none; flex-wrap: wrap; transition: background 0.15s; }
+.report-header:hover { background: var(--color-background-secondary); }
+.report-header.open { border-bottom: 0.5px solid var(--color-border-tertiary); }
+.report-date-badge { background: #1a2e5e; color: white; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: var(--border-radius-md); white-space: nowrap; }
+.report-summary { display: flex; gap: 16px; flex: 1; flex-wrap: wrap; }
+.rsm { font-size: 12px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 5px; }
+.rsm strong { color: var(--color-text-primary); font-weight: 500; }
+.report-actions { display: flex; gap: 8px; margin-left: auto; }
+.icon-btn { padding: 5px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); cursor: pointer; font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.icon-btn:hover { background: var(--color-background-tertiary); }
+.icon-btn.danger:hover { border-color: #f0c4c4; color: #a32d2d; background: #fcebeb; }
+.report-body { display: none; padding: 0 18px 14px; }
+.report-body.open { display: block; }
+.mini-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+.mini-table th { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); padding: 6px 10px; text-align: left; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); text-transform: uppercase; }
+.mini-table td { padding: 7px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.mini-table tr:last-child td { border-bottom: none; }
+.no-reports { text-align: center; padding: 40px; color: var(--color-text-secondary); font-size: 13px; }
+.chevron { transition: transform 0.2s; font-size: 14px; color: var(--color-text-secondary); }
+.chevron.open { transform: rotate(180deg); }
+.report-search { padding: 8px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); width: 220px; }
+.admin-badge-pill { display: inline-block; background: #c0272d; color: white; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
+.saved-toast { position: fixed; bottom: 24px; right: 24px; background: #1a2e5e; color: white; padding: 10px 20px; border-radius: var(--border-radius-md); font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 2000; display: flex; align-items: center; gap: 8px; }
+.saved-toast.show { opacity: 1; }
+.strength-bar { height: 4px; border-radius: 4px; background: var(--color-background-secondary); margin-top: -10px; margin-bottom: 14px; overflow: hidden; }
+.strength-fill { height: 100%; border-radius: 4px; transition: width 0.3s, background 0.3s; width: 0%; }
+.strength-label { font-size: 11px; color: var(--color-text-secondary); margin-top: -10px; margin-bottom: 14px; }
+.reason-sel { padding: 4px 8px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 11px; background: var(--color-background-secondary); color: var(--color-text-primary); cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="portal">
+  <div class="header">
+    <div class="header-inner">
+      <div class="lsbf-text">
+        <span class="lsbf-main">LSBF</span>
+        <span class="lsbf-college">College</span>
+        <span class="lsbf-sub">London School of Business &amp; Finance</span>
+      </div>
+      <div class="header-divider"></div>
+      <div class="header-portal-info">
+        <h1>Staff Attendance Portal</h1>
+        <p>May 2026 Semester &nbsp;·&nbsp; Master Campus</p>
+      </div>
+      <div class="header-right">
+        <div class="header-date" id="live-date"></div>
+        <div id="admin-user-wrap" style="display:none;" class="admin-user-pill">
+          <div id="admin-avatar" class="admin-avatar"></div>
+          <span id="admin-name" class="admin-name"></span>
+        </div>
+        <button class="logout-btn" id="logout-btn" style="display:none;" onclick="logoutAdmin()"><i class="ti ti-logout"></i> Sign out</button>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button class="nav-btn active" onclick="switchView('student')"><i class="ti ti-users"></i> Student View</button>
+      <button class="nav-btn" onclick="switchView('admin')"><i class="ti ti-lock"></i> Admin View <span id="admin-indicator"></span></button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- STUDENT VIEW -->
+    <div class="view active" id="view-student">
+      <div class="stats-row">
+        <div class="stat-card"><div class="slabel"><span class="dot green"></span> Present today</div><div class="svalue green" id="s-present">—</div></div>
+        <div class="stat-card"><div class="slabel"><span class="dot red"></span> Absent today</div><div class="svalue red" id="s-absent">—</div></div>
+        <div class="stat-card"><div class="slabel"><span class="dot blue"></span> Total staff</div><div class="svalue blue" id="s-total">—</div></div>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="s-search" placeholder="Search by name, subject or department..." oninput="renderStudent()">
+        <select class="fsel" id="s-status" onchange="renderStudent()"><option value="all">All status</option><option value="present">Present only</option><option value="absent">Absent only</option></select>
+        <select class="fsel" id="s-dept" onchange="renderStudent()"><option value="all">All departments</option></select>
+      </div>
+      <table class="staff-table">
+        <thead><tr>
+          <th style="width:26%">Staff name</th><th style="width:22%">Department</th>
+          <th style="width:28%">Subject(s)</th><th style="width:24%">Status</th>
+        </tr></thead>
+        <tbody id="s-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div class="view" id="view-admin">
+      <div id="login-wrap" class="admin-lock">
+        <div class="login-card">
+          <div class="login-logo">
+            <span class="login-lsbf">LSBF</span>
+            <span class="login-college">College</span>
+            <span class="login-sub">London School of Business &amp; Finance</span>
+          </div>
+          <h2>Admin sign in</h2>
+          <p class="sub">Sign in with your authorised Google account to access the admin panel. Only pre-approved email addresses are granted access.</p>
+          <div class="auth-failed-msg" id="auth-failed">
+            <i class="ti ti-alert-circle"></i> Access denied. Your Google account is not authorised as an admin.
+          </div>
+          <a class="google-btn" id="google-signin-btn" href="#" onclick="startGoogleLogin()">
+            <svg class="google-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Sign in with Google
+          </a>
+          <p class="auth-notice"><i class="ti ti-shield-lock" style="font-size:11px;"></i> Only authorised LSBF admin emails can sign in.<br>Contact IT if you need access.</p>
+        </div>
+      </div>
+
+      <div id="admin-panel" style="display:none;">
+        <div class="sub-tabs">
+          <button class="sub-tab active" onclick="switchSub('attendance')"><i class="ti ti-clipboard-check"></i> Attendance</button>
+          <button class="sub-tab" onclick="switchSub('notifications')"><i class="ti ti-bell"></i> Student Alerts <span id="notif-count-badge" style="background:#1565c0;color:white;font-size:10px;padding:1px 7px;border-radius:20px;margin-left:4px;"></span></button>
+          <button class="sub-tab" onclick="switchSub('staff')"><i class="ti ti-user-plus"></i> Manage Staff</button>
+          <button class="sub-tab" onclick="switchSub('reports')"><i class="ti ti-archive"></i> Daily Reports <span id="report-count-badge" style="background:#c0272d;color:white;font-size:10px;padding:1px 7px;border-radius:20px;margin-left:4px;"></span></button>
+          <button class="sub-tab" onclick="switchSub('settings')"><i class="ti ti-settings"></i> Settings</button>
+        </div>
+
+        <!-- ATTENDANCE -->
+        <div class="sub-panel active" id="sub-attendance">
+          <div class="stats-row">
+            <div class="stat-card"><div class="slabel"><span class="dot green"></span> Present</div><div class="svalue green" id="a-present">—</div></div>
+            <div class="stat-card"><div class="slabel"><span class="dot red"></span> Absent</div><div class="svalue red" id="a-absent">—</div></div>
+            <div class="stat-card"><div class="slabel"><span class="dot blue"></span> Total staff</div><div class="svalue blue" id="a-total">—</div></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+            <div class="search-bar" style="margin-bottom:0;flex:1;">
+              <input type="text" id="a-search" placeholder="Search by name..." oninput="renderAdmin()">
+              <select class="fsel" id="a-status" onchange="renderAdmin()"><option value="all">All status</option><option value="present">Present only</option><option value="absent">Absent only</option></select>
+              <select class="fsel" id="a-dept" onchange="renderAdmin()"><option value="all">All departments</option></select>
+            </div>
+            <button class="snap-btn" onclick="saveReport()"><i class="ti ti-device-floppy"></i> Save today's report</button>
+          </div>
+          <table class="staff-table">
+            <thead><tr>
+              <th style="width:22%">Staff name</th><th style="width:20%">Department</th>
+              <th style="width:22%">Subject(s)</th><th style="width:20%">Status / Reason</th>
+              <th style="width:16%;text-align:center;">Action</th>
+            </tr></thead>
+            <tbody id="a-tbody"></tbody>
+          </table>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin-top:12px;"><i class="ti ti-info-circle"></i> Changes reflect instantly in the student view. Set leave type when marking absent.</p>
+        </div>
+
+        <!-- STUDENT NOTIFICATIONS -->
+        <div class="sub-panel" id="sub-notifications">
+          <div id="notif-body"></div>
+        </div>
+
+        <!-- MANAGE STAFF -->
+        <div class="sub-panel" id="sub-staff">
+          <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+            <div class="add-staff-card">
+              <h3><i class="ti ti-user-plus"></i> Add new staff member</h3>
+              <p class="desc">Register a new lecturer or staff. They appear immediately in both views.</p>
+              <label class="field-label">Full name</label>
+              <input type="text" id="ns-name" placeholder="e.g. Mr Ahmad Razif">
+              <label class="field-label">Department</label>
+              <select id="ns-dept-sel"><option value="">— Select existing —</option></select>
+              <label class="field-label" style="margin-top:-6px;">Or enter new department</label>
+              <input type="text" id="ns-dept-new" placeholder="e.g. Law & Governance">
+              <label class="field-label">Subject(s)</label>
+              <input type="text" id="ns-subj" placeholder="e.g. Business Law, Contract Law">
+              <div class="error-msg" id="ns-error"></div>
+              <div class="success-msg" id="ns-success"></div>
+              <button class="save-btn" onclick="addStaff()"><i class="ti ti-user-plus"></i> Add staff member</button>
+              <div class="staff-list-mini">
+                <h4><i class="ti ti-users"></i> Recently added this session</h4>
+                <div id="new-staff-list"><p style="font-size:12px;color:var(--color-text-secondary);">None yet.</p></div>
+              </div>
+            </div>
+            <div style="flex:1;min-width:240px;">
+              <div class="info-box" style="margin-top:0;">
+                <strong><i class="ti ti-info-circle"></i> Note</strong><br><br>
+                New staff added here are <strong>session-only</strong> by default.<br><br>
+                To make staff additions permanent, connect a <strong>MongoDB database</strong> via the <code>MONGODB_URI</code> environment variable in your Railway deployment.<br><br>
+                Alternatively contact your IT administrator to update the staff list in the source code.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="sub-panel" id="sub-reports">
+          <div class="report-toolbar">
+            <input type="text" class="report-search" id="rpt-search" placeholder="Search by date or staff..." oninput="renderReports()">
+            <select class="fsel" id="rpt-filter" onchange="renderReports()">
+              <option value="all">All days</option>
+              <option value="thisweek">This week</option>
+              <option value="thismonth">This month</option>
+            </select>
+            <button class="dl-btn" onclick="exportAllCSV()"><i class="ti ti-download"></i> Export all (CSV)</button>
+            <button class="dl-btn" onclick="exportAllJSON()"><i class="ti ti-file-code"></i> Export all (JSON)</button>
+          </div>
+          <div class="report-list" id="report-list"></div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="sub-panel" id="sub-settings">
+          <div class="settings-wrap">
+            <div class="settings-card">
+              <h3><i class="ti ti-brand-google"></i> Google account</h3>
+              <p class="desc">Admin access is managed via Google OAuth. To add or remove admins, update the <code>ADMIN_EMAILS</code> environment variable in your Railway deployment.</p>
+              <div class="info-box" style="margin-bottom:16px;">
+                <strong>Signed in as:</strong><br>
+                <span id="settings-email" style="color:var(--color-text-primary);"></span><br><br>
+                <strong>Backend URL:</strong><br>
+                <span id="settings-backend" style="color:var(--color-text-primary);font-family:monospace;font-size:11px;"></span>
+              </div>
+              <button class="save-btn" style="background:#c0272d;" onclick="logoutAdmin()"><i class="ti ti-logout"></i> Sign out</button>
+            </div>
+            <div style="flex:1;min-width:220px;">
+              <div class="info-box">
+                <strong><i class="ti ti-server"></i> Backend connection</strong><br><br>
+                This portal connects to your <strong>Railway-hosted backend</strong> for:<br><br>
+                ✅ Google OAuth authentication<br>
+                ✅ Sending real Gmail notifications<br>
+                ✅ Persisting daily reports<br><br>
+                <strong>To change the backend URL</strong>, edit the <code>API_BASE</code> constant at the top of this HTML file.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leave Reason Modal -->
+<div class="modal-overlay hidden" id="leave-modal">
+  <div class="modal">
+    <h3><i class="ti ti-calendar-off"></i> Set absence reason</h3>
+    <p id="modal-staff-name" style="font-weight:500;color:var(--color-text-primary);font-size:13px;margin-bottom:4px;"></p>
+    <p>Select the leave type and optionally add a note visible to students.</p>
+    <label>Leave type</label>
+    <select id="modal-leave-type">
+      <option value="Medical Leave">🏥 Medical Leave</option>
+      <option value="Emergency Leave">🚨 Emergency Leave</option>
+      <option value="Annual Leave">🌴 Annual Leave</option>
+    </select>
+    <label>Note (optional)</label>
+    <textarea id="modal-note" placeholder="e.g. MC submitted, back on Monday..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeLeaveModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmLeave()"><i class="ti ti-check"></i> Confirm absent</button>
+    </div>
+  </div>
+</div>
+
+<div class="saved-toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  CONFIG — UPDATE THIS AFTER RAILWAY DEPLOY
+// ─────────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:3000'; // ← Change to your Railway URL after deploy
+
+// ─────────────────────────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────────────────────────
+const staff = [
+  { name:"Ms Khairul Bariah", dept:"Accounting & Finance", subj:"Financial Accounting, Taxation, Auditing", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mr Firdaus Akmal", dept:"Business & Economics", subj:"Microeconomics, Business Fundamentals", present:true, leaveType:'', leaveNote:'' },
+  { name:"Dr Seyedeh Somayeh", dept:"English & Communication", subj:"English Writing, Writing & Reporting, EAP", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Zakirah", dept:"Psychology", subj:"Psychological Testing, Sensation & Perception", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Tengku Nur Nusrah", dept:"Psychology", subj:"Everyday Psychology, Research Methodology", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mr Vijay Kumar", dept:"Computer Science", subj:"Database, Programming, Network & Data Comm.", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mdm Noorliza Md Noordin", dept:"HRM & Management", subj:"Human Resource Development, Performance Mgt", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Norzilah Mahmod", dept:"Accounting & Finance", subj:"Financial Transactions, Management Accounting", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mr Anwari Arifin", dept:"Psychology", subj:"Cross-cultural Psychology, Counselling Psychology", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mr Mohamad Nazmi Mohamad Nor", dept:"Hospitality & Management", subj:"Personality Dev., Supervision, Cuisine", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Darling Darlene D'Cruz", dept:"English & Communication", subj:"Public Speaking, Creative Writing, English I & II", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Nabilla Mohd Johan", dept:"Marketing & Management", subj:"Intro to Marketing, Social Media Marketing", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Jazatul Ikma", dept:"Occupational Safety & Health", subj:"OSH Management, Intro to OSH", present:true, leaveType:'', leaveNote:'' },
+  { name:"Dr Nurliana Abd Mutalib", dept:"Health & Research", subj:"Writing & Research Skills, Anatomy, Microbiology", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Wan Nurul Huda", dept:"Mathematics & Statistics", subj:"Mathematics I, Business Statistics", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Zuria Suzieanna", dept:"General Studies / MPU", subj:"Integrity & Anti-Corruption, Philosophy", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Nik Umairah", dept:"Hospitality Management", subj:"Intro to Hospitality, Safety & Hygiene", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mr Veluswamy Jayavardhanavelu", dept:"Computer Science", subj:"Computer Fundamentals, Human-Computer Interaction", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mr Alex Chang", dept:"Accounting & Finance", subj:"Financial Records, Introduction to Finance", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Shakila Rao", dept:"Psychology", subj:"Applied Psychology, Social Psychology", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Nur Nazirah", dept:"Hospitality Management", subj:"Housekeeping Management", present:true, leaveType:'', leaveNote:'' },
+  { name:"Prof Vijay", dept:"Logistics & Supply Chain", subj:"International Logistics, Physical Distribution", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Syuhada Azwa", dept:"Digital & Multimedia", subj:"Fundamentals of IT, Multimedia Technology", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms Siti Mahirah", dept:"Accounting & Finance", subj:"Introduction to Accounting, Financial Accounting 1", present:true, leaveType:'', leaveNote:'' },
+  { name:"Mr B", dept:"Computer Science", subj:"Fundamentals of IT (ODL)", present:true, leaveType:'', leaveNote:'' },
+  { name:"Ms E", dept:"Psychology", subj:"Adolescent Psychology, Abnormal Psychology", present:true, leaveType:'', leaveNote:'' },
+];
+
+const students = [
+  { name:"Ahrnan", programme:"Diploma in Computer Science", departments:["Computer Science"], email:"aahrnan@gmail.com", phone:"+60106682813" }
+];
+
+let reports = {};
+let notifLog = [];
+let notifSentSet = new Set();
+let newlyAddedStaff = [];
+let pendingLeaveIdx = null;
+let currentAdminUser = null;
+
+// ─────────────────────────────────────────────────────────────
+//  INIT — check auth state on load
+// ─────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  fillDepts(); updateStats(); renderStudent(); tick(); setInterval(tick, 30000);
+
+  // Check URL for auth result
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('auth') === 'failed') {
+    document.getElementById('auth-failed').style.display = 'block';
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  // Check if already authenticated
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/status`, { credentials: 'include' });
+    const data = await res.json();
+    if (data.authenticated) {
+      showAdminPanel(data.user);
+      loadReports();
+    }
+  } catch(e) {
+    // Backend not reachable — running offline
+    console.warn('Backend not reachable. Running in offline mode.');
+  }
+});
+
+function startGoogleLogin() {
+  window.location.href = `${API_BASE}/auth/google`;
+}
+
+function showAdminPanel(user) {
+  currentAdminUser = user;
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('logout-btn').style.display = 'flex';
+  document.getElementById('admin-user-wrap').style.display = 'flex';
+  document.getElementById('admin-indicator').innerHTML = '<span class="admin-badge-pill">Active</span>';
+
+  const avatarEl = document.getElementById('admin-avatar');
+  if (user.photo) {
+    avatarEl.innerHTML = `<img src="${user.photo}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`;
+  } else {
+    avatarEl.textContent = user.name?.[0]?.toUpperCase() || 'A';
+  }
+  document.getElementById('admin-name').textContent = user.name;
+  document.getElementById('settings-email').textContent = user.email;
+  document.getElementById('settings-backend').textContent = API_BASE;
+
+  fillDepts(); updateStats(); renderAdmin(); renderNotifications();
+}
+
+async function logoutAdmin() {
+  try { await fetch(`${API_BASE}/auth/logout`, { credentials: 'include' }); } catch(e) {}
+  currentAdminUser = null;
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('admin-user-wrap').style.display = 'none';
+  document.getElementById('admin-indicator').innerHTML = '';
+  switchView('student');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  REPORTS — load from backend
+// ─────────────────────────────────────────────────────────────
+async function loadReports() {
+  try {
+    const res = await fetch(`${API_BASE}/api/reports`, { credentials: 'include' });
+    const data = await res.json();
+    reports = data.reports || {};
+    updateReportBadge(); renderReports();
+  } catch(e) { console.warn('Could not load reports from backend.'); }
+}
+
+async function saveReportToBackend(key, report) {
+  try {
+    await fetch(`${API_BASE}/api/reports`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, report }),
+    });
+  } catch(e) { console.warn('Could not save report to backend — stored locally only.'); }
+}
+
+async function deleteReportFromBackend(key) {
+  try {
+    await fetch(`${API_BASE}/api/reports/${key}`, { method: 'DELETE', credentials: 'include' });
+  } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GMAIL NOTIFICATION
+// ─────────────────────────────────────────────────────────────
+async function sendEmailViaBackend(notif) {
+  try {
+    const res = await fetch(`${API_BASE}/api/notify/email`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(notif),
+    });
+    const data = await res.json();
+    return data.success;
+  } catch(e) {
+    console.error('Email send failed:', e);
+    return false;
+  }
+}
+
+async function sendAllNotifications() {
+  const btn = document.querySelector('.send-notif-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Sending...'; }
+
+  let sent = 0;
+  for (let i = 0; i < notifLog.length; i++) {
+    if (notifSentSet.has(i)) continue;
+    const ok = await sendEmailViaBackend(notifLog[i]);
+    if (ok) { notifSentSet.add(i); sent++; }
+  }
+
+  showToast(`<i class="ti ti-mail"></i> ${sent} email${sent!==1?'s':''} sent via Gmail`);
+  renderNotifications();
+}
+
+async function sendSingleEmail(i) {
+  const ok = await sendEmailViaBackend(notifLog[i]);
+  if (ok) { notifSentSet.add(i); showToast('<i class="ti ti-check"></i> Email sent to '+notifLog[i].studentEmail); renderNotifications(); }
+  else showToast('<i class="ti ti-alert-circle"></i> Failed to send. Check backend.');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  UTILITY
+// ─────────────────────────────────────────────────────────────
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function fmtDate(key) {
+  const [y,m,d]=key.split('-');
+  return new Date(+y,+m-1,+d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function tick() {
+  const now=new Date();
+  document.getElementById('live-date').textContent=
+    now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+
+    ' · '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function leaveClass(t){return t==='Medical Leave'?'medical':t==='Emergency Leave'?'emergency':t==='Annual Leave'?'annual':'absent';}
+
+function updateStats() {
+  const p=staff.filter(s=>s.present).length,a=staff.filter(s=>!s.present).length,t=staff.length;
+  ['s','a'].forEach(x=>{
+    const pe=document.getElementById(x+'-present');const ae=document.getElementById(x+'-absent');const te=document.getElementById(x+'-total');
+    if(pe)pe.textContent=p;if(ae)ae.textContent=a;if(te)te.textContent=t;
+  });
+}
+
+function depts(){return[...new Set(staff.map(s=>s.dept))].sort();}
+function fillDepts(){
+  ['s-dept','a-dept'].forEach(id=>{
+    const sel=document.getElementById(id);if(!sel)return;
+    const cur=sel.value;while(sel.options.length>1)sel.remove(1);
+    depts().forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+    sel.value=cur||'all';
+  });
+  const dsel=document.getElementById('ns-dept-sel');if(!dsel)return;
+  while(dsel.options.length>1)dsel.remove(1);
+  depts().forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;dsel.appendChild(o);});
+}
+
+function getFiltered(si,sti,di){
+  const q=(document.getElementById(si)?.value||'').toLowerCase();
+  const st=document.getElementById(sti)?.value||'all';
+  const dp=document.getElementById(di)?.value||'all';
+  return staff.filter(s=>{
+    const nm=s.name.toLowerCase().includes(q)||s.dept.toLowerCase().includes(q)||s.subj.toLowerCase().includes(q);
+    const sok=st==='all'||(st==='present'&&s.present)||(st==='absent'&&!s.present);
+    const dok=dp==='all'||s.dept===dp;
+    return nm&&sok&&dok;
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  RENDER — STUDENT VIEW
+// ─────────────────────────────────────────────────────────────
+function renderStudent(){
+  const rows=getFiltered('s-search','s-status','s-dept');
+  const tb=document.getElementById('s-tbody');tb.innerHTML='';
+  if(!rows.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--color-text-secondary);">No staff found.</td></tr>';return;}
+  rows.forEach(s=>{
+    const tr=document.createElement('tr');
+    const statusCell=s.present
+      ?`<span class="badge present"><span class="dot green" style="width:6px;height:6px;"></span>Present</span>`
+      :`<div><span class="badge ${leaveClass(s.leaveType)}"><span class="dot red" style="width:6px;height:6px;"></span>Absent${s.leaveType?' · '+s.leaveType:''}</span>${s.leaveNote?`<div class="leave-reason"><i class="ti ti-note" style="font-size:11px;"></i>${s.leaveNote}</div>`:''}</div>`;
+    tr.innerHTML=`<td style="font-weight:500;">${s.name}</td><td style="color:var(--color-text-secondary);font-size:12px;">${s.dept}</td><td style="color:var(--color-text-secondary);font-size:12px;">${s.subj}</td><td>${statusCell}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  RENDER — ADMIN VIEW
+// ─────────────────────────────────────────────────────────────
+function renderAdmin(){
+  const rows=getFiltered('a-search','a-status','a-dept');
+  const tb=document.getElementById('a-tbody');tb.innerHTML='';
+  if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--color-text-secondary);">No staff found.</td></tr>';return;}
+  rows.forEach(s=>{
+    const idx=staff.indexOf(s);
+    const tr=document.createElement('tr');
+    const statusCell=s.present
+      ?`<span class="badge present"><span class="dot green" style="width:6px;height:6px;"></span>Present</span>`
+      :`<div><span class="badge ${leaveClass(s.leaveType)}"><span class="dot red" style="width:6px;height:6px;"></span>${s.leaveType||'Absent'}</span>${s.leaveNote?`<div class="leave-reason" style="white-space:normal;">${s.leaveNote}</div>`:''}<select class="reason-sel" style="margin-top:5px;" onchange="setLeaveType(${idx},this.value)"><option value="">Change reason…</option><option value="Medical Leave" ${s.leaveType==='Medical Leave'?'selected':''}>🏥 Medical Leave</option><option value="Emergency Leave" ${s.leaveType==='Emergency Leave'?'selected':''}>🚨 Emergency Leave</option><option value="Annual Leave" ${s.leaveType==='Annual Leave'?'selected':''}>🌴 Annual Leave</option></select></div>`;
+    tr.innerHTML=`<td style="font-weight:500;">${s.name}</td><td style="color:var(--color-text-secondary);font-size:12px;">${s.dept}</td><td style="color:var(--color-text-secondary);font-size:12px;">${s.subj}</td><td>${statusCell}</td><td style="text-align:center;"><button class="toggle-btn ${s.present?'mark-absent':'mark-present'}" onclick="${s.present?'openLeaveModal('+idx+')':'markPresent('+idx+')'}">${s.present?'Mark absent':'Mark present'}</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function setLeaveType(idx,val){if(!val)return;staff[idx].leaveType=val;updateStats();renderStudent();renderAdmin();checkAndNotify(idx);showToast('<i class="ti ti-check"></i> Leave type set to '+val);}
+
+// ─────────────────────────────────────────────────────────────
+//  LEAVE MODAL
+// ─────────────────────────────────────────────────────────────
+function openLeaveModal(idx){pendingLeaveIdx=idx;document.getElementById('modal-staff-name').textContent=staff[idx].name;document.getElementById('modal-leave-type').value=staff[idx].leaveType||'Medical Leave';document.getElementById('modal-note').value=staff[idx].leaveNote||'';document.getElementById('leave-modal').classList.remove('hidden');}
+function closeLeaveModal(){document.getElementById('leave-modal').classList.add('hidden');pendingLeaveIdx=null;}
+function confirmLeave(){
+  const idx=pendingLeaveIdx;if(idx===null)return;
+  staff[idx].present=false;staff[idx].leaveType=document.getElementById('modal-leave-type').value;staff[idx].leaveNote=document.getElementById('modal-note').value.trim();
+  closeLeaveModal();updateStats();renderStudent();renderAdmin();checkAndNotify(idx);
+  showToast('<i class="ti ti-user-off"></i> '+staff[idx].name+' marked absent ('+staff[idx].leaveType+')');
+}
+function markPresent(idx){staff[idx].present=true;staff[idx].leaveType='';staff[idx].leaveNote='';updateStats();renderStudent();renderAdmin();showToast('<i class="ti ti-user-check"></i> '+staff[idx].name+' marked present');}
+
+// ─────────────────────────────────────────────────────────────
+//  NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────
+function checkAndNotify(idx){
+  const s=staff[idx];if(s.present)return;
+  students.forEach(student=>{
+    const affected=student.departments.some(d=>s.dept.toLowerCase().includes(d.toLowerCase()));
+    if(!affected)return;
+    const key=`${student.email}::${s.name}::${todayKey()}`;
+    if(notifLog.find(n=>n._key===key))return; // deduplicate
+    notifLog.push({_key:key,studentName:student.name,studentEmail:student.email,studentPhone:student.phone,staffName:s.name,dept:s.dept,leaveType:s.leaveType||'Absent',leaveNote:s.leaveNote||'',timestamp:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),programme:student.programme});
+    updateNotifBadge();
+  });
+  renderNotifications();
+}
+
+function updateNotifBadge(){const b=document.getElementById('notif-count-badge');if(b)b.textContent=notifLog.length>0?notifLog.length:'';}
+
+function renderNotifications(){
+  const wrap=document.getElementById('notif-body');if(!wrap)return;
+  const absentAffected=staff.filter(s=>!s.present&&students.some(st=>st.departments.some(d=>s.dept.toLowerCase().includes(d.toLowerCase()))));
+  let html=`<div class="students-card"><h3><i class="ti ti-users"></i> Registered students for alerts</h3>`;
+  students.forEach(st=>{
+    const aff=staff.filter(s=>!s.present&&st.departments.some(d=>s.dept.toLowerCase().includes(d.toLowerCase())));
+    html+=`<div class="student-row"><div class="student-info"><strong>${st.name}</strong><div class="smeta"><i class="ti ti-school" style="font-size:11px;"></i> ${st.programme} &nbsp;·&nbsp; <i class="ti ti-mail" style="font-size:11px;"></i> ${st.email} &nbsp;·&nbsp; <i class="ti ti-phone" style="font-size:11px;"></i> ${st.phone}</div>${aff.length?`<div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap;">`+aff.map(s=>`<span class="affected-badge"><i class="ti ti-user-off" style="font-size:10px;"></i> ${s.name} (${s.leaveType||'Absent'})</span>`).join('')+`</div>`:`<div style="margin-top:5px;font-size:11px;color:#3b6d11;">✓ No affected lecturers today</div>`}</div></div>`;
+  });
+  html+=`</div><div class="notif-section"><div class="notif-header"><h3><i class="ti ti-bell-ringing"></i> Pending notifications</h3>${notifLog.length?`<button class="send-notif-btn" onclick="sendAllNotifications()"><i class="ti ti-send"></i> Send all via Gmail</button>`:''}</div><div class="notif-banner">`;
+  if(!notifLog.length){html+=`<div class="no-notif"><i class="ti ti-bell-off" style="font-size:28px;display:block;margin-bottom:8px;"></i>No notifications triggered yet.<br><span style="font-size:12px;">Mark a Computer Science lecturer absent to generate an alert for Ahrnan.</span></div>`;}
+  else{
+    notifLog.slice().reverse().forEach((log,ri)=>{
+      const i=notifLog.length-1-ri;
+      const sent=notifSentSet.has(i);
+      html+=`<div class="notif-log-item"><div><div style="font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><strong>${log.studentName}</strong> — <strong>${log.staffName}</strong> absent (${log.leaveType}) ${sent?'<span class="sent-badge"><i class="ti ti-check" style="font-size:10px;"></i> Sent</span>':''}</div><div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;"><i class="ti ti-clock" style="font-size:10px;"></i> ${log.timestamp} · ${log.programme}</div>${!sent?`<div style="margin-top:8px;"><button class="btn-email" onclick="sendSingleEmail(${i})"><i class="ti ti-mail"></i> Send email to ${log.studentEmail}</button></div>`:''}
+      <div class="notif-preview-box" style="margin-top:8px;"><strong>Email preview:</strong><br>To: ${log.studentEmail}<br>Subject: [LSBF] Class Alert – ${log.staffName} is Absent Today<br><br>Dear ${log.studentName},<br>This is an automated alert. <strong>${log.staffName}</strong> (${log.dept}) is absent today due to <strong>${log.leaveType}</strong>.${log.leaveNote?'<br>Note: '+log.leaveNote:''}<br>Please contact your coordinator for replacement class info.</div></div></div>`;
+    });
+  }
+  html+=`</div></div>`;
+  wrap.innerHTML=html;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ADD STAFF
+// ─────────────────────────────────────────────────────────────
+function addStaff(){
+  const name=document.getElementById('ns-name').value.trim();
+  const deptSel=document.getElementById('ns-dept-sel').value;
+  const deptNew=document.getElementById('ns-dept-new').value.trim();
+  const subj=document.getElementById('ns-subj').value.trim();
+  const dept=deptNew||deptSel;
+  const err=document.getElementById('ns-error');const suc=document.getElementById('ns-success');
+  err.style.display='none';suc.style.display='none';
+  if(!name){err.textContent='Please enter the staff name.';err.style.display='block';return;}
+  if(!dept){err.textContent='Please select or enter a department.';err.style.display='block';return;}
+  if(!subj){err.textContent='Please enter at least one subject.';err.style.display='block';return;}
+  if(staff.some(s=>s.name.toLowerCase()===name.toLowerCase())){err.textContent='A staff member with this name already exists.';err.style.display='block';return;}
+  const nm={name,dept,subj,present:true,leaveType:'',leaveNote:''};
+  staff.push(nm);newlyAddedStaff.push(nm);
+  document.getElementById('ns-name').value='';document.getElementById('ns-dept-sel').value='';document.getElementById('ns-dept-new').value='';document.getElementById('ns-subj').value='';
+  suc.textContent='✓ '+name+' added successfully!';suc.style.display='block';
+  fillDepts();updateStats();renderStudent();renderAdmin();renderNewStaffList();
+  showToast('<i class="ti ti-user-plus"></i> '+name+' added');
+}
+function removeNewStaff(name){
+  const idx=staff.findIndex(s=>s.name===name);if(idx>-1)staff.splice(idx,1);
+  const ni=newlyAddedStaff.findIndex(s=>s.name===name);if(ni>-1)newlyAddedStaff.splice(ni,1);
+  fillDepts();updateStats();renderStudent();renderAdmin();renderNewStaffList();
+}
+function renderNewStaffList(){
+  const wrap=document.getElementById('new-staff-list');if(!wrap)return;
+  if(!newlyAddedStaff.length){wrap.innerHTML='<p style="font-size:12px;color:var(--color-text-secondary);">None yet.</p>';return;}
+  wrap.innerHTML=newlyAddedStaff.map(s=>`<div class="staff-item-mini"><div><div class="sname">${s.name}</div><div class="sdept">${s.dept} · ${s.subj}</div></div><button class="remove-staff-btn" onclick="removeNewStaff('${s.name.replace(/'/g,"\\'")}')"><i class="ti ti-x"></i></button></div>`).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  REPORTS
+// ─────────────────────────────────────────────────────────────
+function saveReport(){
+  const key=todayKey();const now=new Date();
+  const savedAt=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const report={date:fmtDate(key),key,savedAt,present:staff.filter(s=>s.present).length,absent:staff.filter(s=>!s.present).length,total:staff.length,records:staff.map(s=>({name:s.name,dept:s.dept,subj:s.subj,status:s.present?'Present':'Absent',leaveType:s.leaveType||'',leaveNote:s.leaveNote||''}))};
+  reports[key]=report;
+  saveReportToBackend(key,report);
+  updateReportBadge();showToast('<i class="ti ti-check"></i> Report saved for '+fmtDate(key));renderReports();
+}
+function updateReportBadge(){const n=Object.keys(reports).length;const b=document.getElementById('report-count-badge');if(b)b.textContent=n>0?n:'';}
+function getFilteredReports(){
+  const q=(document.getElementById('rpt-search')?.value||'').toLowerCase();
+  const f=document.getElementById('rpt-filter')?.value||'all';
+  const now=new Date();const weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay());
+  return Object.keys(reports).sort().reverse().filter(key=>{
+    const r=reports[key];
+    const matchQ=!q||key.includes(q)||r.date.toLowerCase().includes(q)||r.records.some(x=>x.name.toLowerCase().includes(q)||x.dept.toLowerCase().includes(q));
+    const d=new Date(key);
+    const matchF=f==='all'||(f==='thisweek'&&d>=weekStart)||(f==='thismonth'&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear());
+    return matchQ&&matchF;
+  });
+}
+function renderReports(){
+  const keys=getFilteredReports();const list=document.getElementById('report-list');if(!list)return;
+  if(!keys.length){list.innerHTML='<div class="no-reports"><i class="ti ti-archive" style="font-size:32px;display:block;margin-bottom:10px;"></i>No reports filed yet.<br><span style="font-size:12px;">Go to Attendance and click <strong>Save today\'s report</strong>.</span></div>';return;}
+  list.innerHTML='';
+  keys.forEach(key=>{
+    const r=reports[key];const pct=Math.round((r.present/r.total)*100);
+    const card=document.createElement('div');card.className='report-card';
+    card.innerHTML=`<div class="report-header" onclick="toggleReport('${key}',this)"><span class="report-date-badge"><i class="ti ti-calendar"></i> ${r.date}</span><div class="report-summary"><span class="rsm"><span class="dot green" style="width:7px;height:7px;"></span> Present: <strong>${r.present}</strong></span><span class="rsm"><span class="dot red" style="width:7px;height:7px;"></span> Absent: <strong>${r.absent}</strong></span><span class="rsm"><i class="ti ti-percent"></i> Rate: <strong>${pct}%</strong></span><span class="rsm" style="font-size:11px;">Saved at ${r.savedAt}</span></div><div class="report-actions" onclick="event.stopPropagation()"><button class="icon-btn" onclick="exportCSV('${key}')"><i class="ti ti-file-spreadsheet"></i> CSV</button><button class="icon-btn" onclick="exportJSON('${key}')"><i class="ti ti-file-code"></i> JSON</button><button class="icon-btn danger" onclick="deleteReport('${key}')"><i class="ti ti-trash"></i></button></div><i class="ti ti-chevron-down chevron" id="chev-${key}"></i></div><div class="report-body" id="body-${key}"><table class="mini-table"><thead><tr><th>Name</th><th>Dept</th><th>Status</th><th>Leave Type</th></tr></thead><tbody>${r.records.map(x=>`<tr><td style="font-weight:500;">${x.name}</td><td style="color:var(--color-text-secondary);">${x.dept}</td><td><span class="badge ${x.status==='Present'?'present':leaveClass(x.leaveType)}">${x.status}</span></td><td style="font-size:11px;color:var(--color-text-secondary);">${x.leaveType||'—'}</td></tr>`).join('')}</tbody></table></div>`;
+    list.appendChild(card);
+  });
+}
+function toggleReport(key,hdr){const body=document.getElementById('body-'+key);const chev=document.getElementById('chev-'+key);const open=body.classList.toggle('open');hdr.classList.toggle('open',open);chev.classList.toggle('open',open);}
+function deleteReport(key){if(!confirm('Delete the report for '+reports[key].date+'?'))return;delete reports[key];deleteReportFromBackend(key);updateReportBadge();renderReports();showToast('<i class="ti ti-trash"></i> Report deleted');}
+function exportCSV(key){const r=reports[key];const rows=[['Date','Saved At','Name','Dept','Subjects','Status','Leave Type','Note'],...r.records.map(x=>[r.date,r.savedAt,x.name,x.dept,x.subj,x.status,x.leaveType||'',x.leaveNote||''])];download('LSBF_Attendance_'+key+'.csv','text/csv',rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n'));}
+function exportJSON(key){download('LSBF_Attendance_'+key+'.json','application/json',JSON.stringify(reports[key],null,2));}
+function exportAllCSV(){const keys=Object.keys(reports).sort();if(!keys.length){showToast('<i class="ti ti-alert-circle"></i> No reports');return;}const rows=[['Date','Saved At','Name','Dept','Subjects','Status','Leave Type','Note']];keys.forEach(k=>{const r=reports[k];r.records.forEach(x=>rows.push([r.date,r.savedAt,x.name,x.dept,x.subj,x.status,x.leaveType||'',x.leaveNote||'']));rows.push([]);});download('LSBF_Attendance_All.csv','text/csv',rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n'));}
+function exportAllJSON(){if(!Object.keys(reports).length){showToast('<i class="ti ti-alert-circle"></i> No reports');return;}download('LSBF_Attendance_All.json','application/json',JSON.stringify(reports,null,2));}
+function download(filename,mime,content){const a=document.createElement('a');a.href='data:'+mime+';charset=utf-8,'+encodeURIComponent(content);a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);showToast('<i class="ti ti-download"></i> Downloaded '+filename);}
+
+// ─────────────────────────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────────────────────────
+function switchView(v){document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-btn')[v==='student'?0:1].classList.add('active');}
+function switchSub(s){document.querySelectorAll('.sub-panel').forEach(e=>e.classList.remove('active'));document.querySelectorAll('.sub-tab').forEach(e=>e.classList.remove('active'));document.getElementById('sub-'+s).classList.add('active');const idx={attendance:0,notifications:1,staff:2,reports:3,settings:4}[s];document.querySelectorAll('.sub-tab')[idx].classList.add('active');}
+function toggleVis(id,btn){const inp=document.getElementById(id);const show=inp.type==='password';inp.type=show?'text':'password';btn.innerHTML=show?'<i class="ti ti-eye-off"></i>':'<i class="ti ti-eye"></i>';}
+
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);}
+
+fillDepts(); updateStats(); renderStudent();
+</script>
+</body>
+</html>
